@@ -6,23 +6,17 @@ The `build-backend.yml` workflow automatically builds and publishes the backend 
 
 ### When does it run?
 
-- **On version tags**: Push a tag like `v1.0.0` to trigger a versioned build
-- **On main branch**: Automatically builds when pushing to main
+- **On backend changes**: Automatically when backend code or Dockerfile changes
+- **On main branch**: When pushing to main
 - **Manual trigger**: Can be manually triggered from GitHub Actions tab
 
-### How to trigger a release:
+### How it works:
 
-```bash
-# Tag a new version
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-This will build and publish:
-- `ghcr.io/mrgarbonzo/secretforge/chat:v1.0.0`
-- `ghcr.io/mrgarbonzo/secretforge/chat:1.0`
-- `ghcr.io/mrgarbonzo/secretforge/chat:1`
+Every commit to main that touches the backend will build and publish:
+- `ghcr.io/mrgarbonzo/secretforge/chat:COMMIT_SHA` (e.g., `0a79259`)
 - `ghcr.io/mrgarbonzo/secretforge/chat:latest`
+
+The docker-compose template always uses `:latest` which points to the most recent build.
 
 ### Make the image public:
 

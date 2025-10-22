@@ -2,10 +2,11 @@ name: Build and Publish Backend Docker Image
 
 on:
   push:
-    tags:
-      - 'v*.*.*'  # Triggers on version tags like v1.0.0
     branches:
-      - main  # Also build on main branch pushes
+      - main  # Build on main branch pushes
+    paths:
+      - 'backend/**'
+      - '.github/workflows/build-backend.yml'
   workflow_dispatch:  # Allow manual trigger
 
 env:
@@ -39,12 +40,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
+            type=sha,prefix=,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -58,4 +55,6 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Image digest
-        run: echo "Image pushed with digest ${{ steps.meta.outputs.digest }}"
+        run: |
+          echo "Image pushed with digest: ${{ steps.meta.outputs.digest }}"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
