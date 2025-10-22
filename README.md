@@ -12,19 +12,21 @@ This folder contains all planning and reference materials for SecretForge:
 
 ### **Key Documents:**
 
-1. **[CLAUDE_CODE_REFERENCE.md](./CLAUDE_CODE_REFERENCE.md)** - Complete technical specification
+1. **[resources/CLAUDE_CODE_REFERENCE.md](./resources/CLAUDE_CODE_REFERENCE.md)** - Complete technical specification
    - Full code for all components
    - API specifications
    - Docker configurations
    - GitHub Actions workflow
    - **Use this to build the project**
 
-2. **[LIVING_DOCUMENT.md](./LIVING_DOCUMENT.md)** - Project overview and planning
+2. **[resources/LIVING_DOCUMENT.md](./resources/LIVING_DOCUMENT.md)** - Project overview and planning
    - Vision and strategy
    - Architecture decisions
    - Phase planning
    - Design principles
    - **Use this for understanding project direction**
+
+See **[resources/INDEX.md](./resources/INDEX.md)** for complete documentation index.
 
 ---
 
@@ -42,30 +44,44 @@ A platform that makes it easy to deploy private, encrypted services on SecretVM.
 - **Deployment:** Docker + SecretVM
 - **CI/CD:** GitHub Actions
 
-### **Project Structure (Planned):**
+### **Project Structure:**
 ```
 secretforge/
 ├── backend/          # Chat service (FastAPI)
+│   ├── app/          # Application code
+│   ├── tests/        # Test suite
+│   ├── Dockerfile    # Production image
+│   └── requirements.txt
 ├── frontend/         # Portal (Next.js)
-├── .github/          # CI/CD workflows
-└── docs/             # Additional documentation
+│   ├── src/          # Source code
+│   │   ├── app/      # Pages
+│   │   ├── components/
+│   │   ├── lib/      # Utilities
+│   │   └── types/
+│   └── package.json
+├── resources/        # Documentation
+└── README.md
 ```
 
 ---
 
-## 📋 **Status: Planning Phase**
+## 📋 **Status: MVP Complete** ✅
 
-**Current Phase:** Architecture & Specification Complete ✅  
-**Next Phase:** Development
+**Current Phase:** Development Complete
+**Next Phase:** Testing & Deployment
 
-**Ready to build:**
+**Completed:**
 - [x] Architecture designed
 - [x] Tech stack chosen
 - [x] Design system defined
 - [x] Complete code specifications written
 - [x] SecretAI API documented
-- [ ] Repository created
-- [ ] Development started
+- [x] Repository created
+- [x] Backend developed
+- [x] Frontend developed
+- [ ] Local testing
+- [ ] SecretVM deployment test
+- [ ] GitHub Actions setup
 
 ---
 
@@ -126,28 +142,62 @@ Private AI Chat Service
 
 ---
 
-## 🛠️ **Development Setup (Future)**
+## 🛠️ **Development Setup**
 
-Once repository is created:
+### **Prerequisites**
+
+- Python 3.12+
+- Node.js 20+
+- Docker (optional, for containerized testing)
+- SecretAI API key (get from https://secretai.scrtlabs.com)
+
+### **Backend Setup**
 
 ```bash
-# Clone repo
-git clone https://github.com/yourorg/secretforge.git
-cd secretforge
-
-# Backend setup
 cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-# Add your SECRET_AI_API_KEY to .env
-uvicorn app.main:app --reload
 
-# Frontend setup (new terminal)
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env and add your SECRET_AI_API_KEY
+
+# Run development server
+uvicorn app.main:app --reload
+```
+
+Backend will be available at http://localhost:3000
+
+### **Frontend Setup**
+
+```bash
 cd frontend
+
+# Install dependencies
 npm install
+
+# Run development server
 npm run dev
+```
+
+Frontend will be available at http://localhost:3000
+
+### **Building for Production**
+
+```bash
+# Backend Docker image
+cd backend
+docker build -t secretforge-chat:latest .
+
+# Frontend static export
+cd frontend
+npm run build
+# Output in /out directory
 ```
 
 ---
