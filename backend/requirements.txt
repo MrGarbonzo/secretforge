@@ -1,5 +1,6 @@
 fastapi[all]==0.104.1
 uvicorn[standard]==0.24.0
+secret-sdk>=1.8.1
 secret-ai-sdk==0.1.5
 pydantic==2.5.0
 pydantic-settings==2.1.0
