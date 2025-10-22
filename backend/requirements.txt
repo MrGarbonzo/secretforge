@@ -1,9 +1,9 @@
-fastapi[all]==0.104.1
-uvicorn[standard]==0.24.0
+fastapi[all]>=0.115.0
+uvicorn[standard]>=0.30.0
 secret-sdk>=1.8.1
 secret-ai-sdk==0.1.5
-pydantic==2.5.0
-pydantic-settings==2.1.0
-python-multipart==0.0.6
-aiosqlite==0.19.0
-python-dotenv==1.0.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-multipart>=0.0.6
+aiosqlite>=0.19.0
+python-dotenv>=1.0.0
