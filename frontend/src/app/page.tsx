@@ -32,9 +32,9 @@ export default function Home() {
             and deploy encrypted services to your own SecretVM instance.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/configure">
+            <Link href="/deploy">
               <Button size="lg">
-                Get Started
+                Get Docker Compose
               </Button>
             </Link>
             <a href="https://docs.scrt.network/secret-network-documentation/secret-ai/" target="_blank" rel="noopener noreferrer">
@@ -104,10 +104,10 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-semibold text-text-primary dark:text-text-primary-dark mb-1">
-                  Configure Your Deployment
+                  Get Docker Compose Template
                 </h4>
                 <p className="text-text-secondary dark:text-text-secondary-dark">
-                  Select VM size and options for your private AI chat service
+                  Copy the ready-to-deploy configuration file from SecretForge
                 </p>
               </div>
             </div>
@@ -118,10 +118,10 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-semibold text-text-primary dark:text-text-primary-dark mb-1">
-                  Generate Docker Compose
+                  Go to SecretAI Portal
                 </h4>
                 <p className="text-text-secondary dark:text-text-secondary-dark">
-                  Get a ready-to-deploy configuration file
+                  Configure VM size, enable persistence, and paste your docker-compose
                 </p>
               </div>
             </div>
@@ -132,10 +132,10 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-semibold text-text-primary dark:text-text-primary-dark mb-1">
-                  Deploy to SecretVM
+                  Add Your API Key & Launch
                 </h4>
                 <p className="text-text-secondary dark:text-text-secondary-dark">
-                  Paste your configuration into the SecretAI portal and launch
+                  Set your SecretAI API key as an environment variable and deploy
                 </p>
               </div>
             </div>

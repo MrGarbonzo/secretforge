@@ -2,30 +2,21 @@
  * Docker Compose generator for SecretForge deployments
  */
 
-import { DeploymentConfig } from '@/types';
-
-export function generateDockerCompose(config: DeploymentConfig): string {
-  const { vmSize, enableHistory } = config;
-
+export function generateDockerCompose(): string {
   return `version: '3.8'
 
 services:
   secretforge-chat:
-    image: secretforge/chat:v1.0.0
+    image: ghcr.io/mrgarbonzo/secretforge/chat:latest
     container_name: secretforge-chat
 
     environment:
       - SECRET_AI_API_KEY=\${SECRET_AI_API_KEY}
-      - ENABLE_HISTORY=${enableHistory}
-      - VM_SIZE=${vmSize}
 
     ports:
       - "3000:3000"
 
-    ${enableHistory ? `volumes:
-      - ./chat-data:/app/data
-
-    ` : ''}restart: unless-stopped
+    restart: unless-stopped
 
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/health')"]
