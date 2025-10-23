@@ -1,5 +1,6 @@
 """SecretAI integration service."""
 import logging
+import asyncio
 from typing import List, Optional
 from secret_ai_sdk.secret_ai import ChatSecret
 from secret_ai_sdk.secret import Secret
@@ -25,24 +26,28 @@ class SecretAIService:
             return
 
         try:
-            # Initialize Secret Network client
+            if not settings.SECRET_AI_API_KEY:
+                raise ValueError("SECRET_AI_API_KEY environment variable not set")
+
+            # Initialize Secret Network client (sync SDK)
             self.secret_client = Secret(
                 chain_id=settings.SECRET_CHAIN_ID,
                 node_url=settings.SECRET_NODE_URL
             )
 
-            # Get available models and URLs
-            models = self.secret_client.get_models()
+            # Get available models and URLs (run sync SDK calls in thread pool)
+            models = await asyncio.to_thread(self.secret_client.get_models)
             if not models:
-                raise ValueError("No models available")
+                raise ValueError("No models available from Secret Network")
 
             logger.info(f"Available models: {models}")
 
-            # Get service URLs for first model
-            urls = self.secret_client.get_urls(model=models[0])
+            # Get service URLs for first model (run sync SDK call in thread pool)
+            urls = await asyncio.to_thread(self.secret_client.get_urls, model=models[0])
             if not urls:
-                raise ValueError("No service URLs available")
+                raise ValueError(f"No service URLs available for model: {models[0]}")
 
+            logger.info(f"Using model: {models[0]}")
             logger.info(f"Using service URL: {urls[0]}")
 
             # Initialize chat client
@@ -57,7 +62,7 @@ class SecretAIService:
             logger.info("SecretAI service initialized successfully")
 
         except Exception as e:
-            logger.error(f"Failed to initialize SecretAI service: {e}")
+            logger.error(f"Failed to initialize SecretAI service: {e}", exc_info=True)
             raise
 
     async def chat(
@@ -91,8 +96,12 @@ class SecretAIService:
             # Add current message
             messages.append(("human", message))
 
-            # Get response from SecretAI
-            response = self.chat_client.invoke(messages, stream=False)
+            # Get response from SecretAI (run sync SDK call in thread pool)
+            response = await asyncio.to_thread(
+                self.chat_client.invoke,
+                messages,
+                stream=False
+            )
 
             return response.content
 
