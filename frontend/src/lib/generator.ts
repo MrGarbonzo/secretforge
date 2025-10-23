@@ -14,7 +14,7 @@ services:
       - SECRET_AI_API_KEY=\${SECRET_AI_API_KEY}
 
     ports:
-      - "3000:3000"
+      - "80:3000"
 
     restart: unless-stopped
 

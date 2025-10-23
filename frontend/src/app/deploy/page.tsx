@@ -173,7 +173,7 @@ export default function Deploy() {
                       Access your private AI chat
                     </p>
                     <p className="text-sm text-text-secondary dark:text-text-secondary-dark">
-                      SecretVM will provide a unique URL to access your encrypted chat service at port 3000
+                      SecretVM will provide a unique URL (e.g., http://your-vm.vm.scrtlabs.com) to access your encrypted chat service
                     </p>
                   </div>
                 </li>

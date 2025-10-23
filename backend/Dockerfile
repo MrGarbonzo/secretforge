@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 
-# Expose port
+# Expose port (mapped to 80 externally)
 EXPOSE 3000
 
 # Health check
