@@ -115,22 +115,46 @@ async def root():
             messageDiv.textContent = content;
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return messageDiv;
         }
 
         async function sendMessage(message) {
+            let assistantMessageDiv = null;
+            let fullResponse = '';
+
             try {
                 sendButton.disabled = true;
                 sendButton.textContent = 'Sending...';
+
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message, history: chatHistory, stream: false })
+                    body: JSON.stringify({ message: message, history: chatHistory, stream: true })
                 });
+
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
+
+                // Create assistant message div for streaming
+                assistantMessageDiv = addMessage('', 'assistant');
+
+                // Read the streaming response
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullResponse += chunk;
+                    assistantMessageDiv.textContent = fullResponse;
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+
+                // Update chat history
                 chatHistory.push({ role: 'user', content: message });
-                chatHistory.push({ role: 'assistant', content: data.response });
-                addMessage(data.response, 'assistant');
+                chatHistory.push({ role: 'assistant', content: fullResponse });
+
             } catch (error) {
                 console.error('Error:', error);
                 addMessage(`Error: ${error.message}`, 'system');

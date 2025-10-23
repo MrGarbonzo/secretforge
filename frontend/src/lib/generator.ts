@@ -7,17 +7,13 @@ export function generateDockerCompose(): string {
 
 services:
   secretforge-chat:
-    image: ghcr.io/mrgarbonzo/secretforge/chat:latest
-    container_name: secretforge-chat
-
+    image: "ghcr.io/mrgarbonzo/secretforge/chat:latest"
+    container_name: "secretforge-chat"
     environment:
       - SECRET_AI_API_KEY=\${SECRET_AI_API_KEY}
-
     ports:
       - "80:3000"
-
     restart: unless-stopped
-
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/health')"]
       interval: 30s

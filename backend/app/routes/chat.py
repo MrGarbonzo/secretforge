@@ -10,24 +10,39 @@ from app.services.secret_ai import secret_ai_service
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post("/chat")
 async def chat(request: ChatRequest):
     """
     Chat endpoint.
 
-    Send a message and get AI response.
+    Send a message and get AI response. Supports both streaming and non-streaming.
     """
     try:
-        # Get response from SecretAI
-        response = await secret_ai_service.chat(
-            message=request.message,
-            history=request.history
-        )
+        # Check if streaming is requested
+        if request.stream:
+            # Return streaming response
+            async def generate():
+                async for chunk in secret_ai_service.chat_stream(
+                    message=request.message,
+                    history=request.history
+                ):
+                    yield chunk
 
-        return ChatResponse(
-            response=response,
-            timestamp=datetime.utcnow().isoformat()
-        )
+            return StreamingResponse(
+                generate(),
+                media_type="text/plain"
+            )
+        else:
+            # Get regular response from SecretAI
+            response = await secret_ai_service.chat(
+                message=request.message,
+                history=request.history
+            )
+
+            return ChatResponse(
+                response=response,
+                timestamp=datetime.utcnow().isoformat()
+            )
 
     except Exception as e:
         logger.error(f"Chat error: {e}")
@@ -35,17 +50,3 @@ async def chat(request: ChatRequest):
             status_code=500,
             detail=f"Failed to get response: {str(e)}"
         )
-
-@router.post("/chat/stream")
-async def chat_stream(request: ChatRequest):
-    """
-    Streaming chat endpoint.
-
-    Stream AI response in real-time.
-    """
-    # TODO: Implement streaming with SecretAI SDK
-    # For now, return regular response
-    raise HTTPException(
-        status_code=501,
-        detail="Streaming not yet implemented"
-    )

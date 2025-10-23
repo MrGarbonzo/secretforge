@@ -22,10 +22,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./chat_history.db"
 
     # Secret Network
-    SECRET_CHAIN_ID: str = "secret-4"
+    SECRET_CHAIN_ID: str = "pulsar-3"
     SECRET_NODE_URL: str = os.getenv(
         "SECRET_NODE_URL",
-        "https://lcd.secret.express"
+        "https://pulsar.lcd.secretnodes.com"
     )
 
     # Logging
