@@ -38,7 +38,8 @@ class SecretAIService:
             )
 
             # Get available models and URLs (run sync SDK calls in thread pool)
-            models = await asyncio.to_thread(self.secret_client.get_models)
+            loop = asyncio.get_event_loop()
+            models = await loop.run_in_executor(None, self.secret_client.get_models)
             if not models:
                 raise ValueError("No models available from Secret Network")
 
@@ -56,7 +57,7 @@ class SecretAIService:
                 selected_model = models[0]
 
             # Get service URLs for selected model (run sync SDK call in thread pool)
-            urls = await asyncio.to_thread(self.secret_client.get_urls, model=selected_model)
+            urls = await loop.run_in_executor(None, lambda: self.secret_client.get_urls(model=selected_model))
             if not urls:
                 raise ValueError(f"No service URLs available for model: {selected_model}")
 
