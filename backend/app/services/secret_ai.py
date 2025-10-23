@@ -20,6 +20,7 @@ class SecretAIService:
         self.model: Optional[str] = None
         self.base_url: Optional[str] = None
         self._initialized = False
+        self._last_error: Optional[str] = None
 
     async def initialize(self):
         """Initialize the SecretAI clients."""
@@ -69,6 +70,7 @@ class SecretAIService:
             logger.info("SecretAI service initialized successfully")
 
         except Exception as e:
+            self._last_error = str(e)
             logger.error(f"Failed to initialize SecretAI service: {e}", exc_info=True)
             raise
 

@@ -23,9 +23,21 @@ class HealthResponse(BaseModel):
     status: Literal["ok", "error"]
     version: str = "1.0.0"
     secret_ai: bool = False
+    secret_ai_error: Optional[str] = None
     history_enabled: bool = False
 
 class HistoryResponse(BaseModel):
     """Chat history response."""
     messages: List[Message]
     count: int
+
+class DiagnosticResponse(BaseModel):
+    """Diagnostic information."""
+    api_key_set: bool
+    api_key_preview: Optional[str] = None
+    secret_ai_initialized: bool
+    last_error: Optional[str] = None
+    model: Optional[str] = None
+    base_url: Optional[str] = None
+    chain_id: str
+    node_url: str

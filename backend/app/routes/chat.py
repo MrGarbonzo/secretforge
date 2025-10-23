@@ -18,6 +18,20 @@ async def chat(request: ChatRequest):
     Send a message and get AI response. Supports both streaming and non-streaming.
     """
     try:
+        # Ensure SecretAI is initialized before processing request
+        if not secret_ai_service._initialized:
+            try:
+                await secret_ai_service.initialize()
+            except Exception as init_error:
+                error_msg = f"SecretAI initialization failed: {str(init_error)}"
+                if secret_ai_service._last_error:
+                    error_msg += f" (Last error: {secret_ai_service._last_error})"
+                logger.error(error_msg)
+                raise HTTPException(
+                    status_code=503,
+                    detail=error_msg
+                )
+
         # Check if streaming is requested
         if request.stream:
             # Return streaming response

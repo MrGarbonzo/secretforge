@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routes import chat, health
+from app.routes import chat, health, diagnostic
 from app.services.secret_ai import secret_ai_service
 
 # Configure logging
@@ -55,6 +55,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health.router, prefix="/api", tags=["health"])
+app.include_router(diagnostic.router, prefix="/api", tags=["diagnostic"])
 app.include_router(chat.router, prefix="/api", tags=["chat"])
 
 # Root endpoint - serve chat UI as inline HTML
