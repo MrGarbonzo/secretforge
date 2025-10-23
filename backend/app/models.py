@@ -39,5 +39,3 @@ class DiagnosticResponse(BaseModel):
     last_error: Optional[str] = None
     model: Optional[str] = None
     base_url: Optional[str] = None
-    chain_id: str
-    node_url: str

@@ -1,10 +1,7 @@
-"""SecretAI integration service."""
+"""SecretAI integration service using OpenAI-compatible endpoint."""
 import logging
-import asyncio
-import httpx
 from typing import List, Optional
-from secret_ai_sdk.secret import Secret
-from secret_ai_sdk.secret_ai_ex import SecretAIError
+from openai import AsyncOpenAI
 
 from app.config import settings
 from app.models import Message
@@ -12,18 +9,18 @@ from app.models import Message
 logger = logging.getLogger(__name__)
 
 class SecretAIService:
-    """Service for interacting with SecretAI."""
+    """Service for interacting with SecretAI via OpenAI-compatible endpoint."""
 
     def __init__(self):
         """Initialize SecretAI service."""
-        self.secret_client: Optional[Secret] = None
-        self.model: Optional[str] = None
-        self.base_url: Optional[str] = None
+        self.client: Optional[AsyncOpenAI] = None
+        self.model: str = "gemma3:4b"
+        self.base_url: str = "https://secretai-rytn.scrtlabs.com:21434/v1"
         self._initialized = False
         self._last_error: Optional[str] = None
 
     async def initialize(self):
-        """Initialize the SecretAI clients."""
+        """Initialize the SecretAI client."""
         if self._initialized:
             return
 
@@ -31,41 +28,18 @@ class SecretAIService:
             if not settings.SECRET_AI_API_KEY:
                 raise ValueError("SECRET_AI_API_KEY environment variable not set")
 
-            # Initialize Secret Network client (sync SDK)
-            self.secret_client = Secret(
-                chain_id=settings.SECRET_CHAIN_ID,
-                node_url=settings.SECRET_NODE_URL
+            logger.info(f"Initializing SecretAI OpenAI-compatible client")
+            logger.info(f"  Endpoint: {self.base_url}")
+            logger.info(f"  Model: {self.model}")
+
+            # Initialize OpenAI client with SecretAI endpoint
+            self.client = AsyncOpenAI(
+                base_url=self.base_url,
+                api_key=settings.SECRET_AI_API_KEY,
+                default_headers={
+                    "X-API-Key": settings.SECRET_AI_API_KEY
+                }
             )
-
-            # Get available models and URLs (run sync SDK calls in thread pool)
-            loop = asyncio.get_event_loop()
-            models = await loop.run_in_executor(None, self.secret_client.get_models)
-            if not models:
-                raise ValueError("No models available from Secret Network")
-
-            logger.info(f"Available models: {models}")
-
-            # Select gemma model (prefer gemma3:4b)
-            selected_model = None
-            for model in models:
-                if "gemma" in model.lower():
-                    selected_model = model
-                    break
-
-            # Fallback to first model if gemma not found
-            if not selected_model:
-                selected_model = models[0]
-
-            # Get service URLs for selected model (run sync SDK call in thread pool)
-            urls = await loop.run_in_executor(None, lambda: self.secret_client.get_urls(model=selected_model))
-            if not urls:
-                raise ValueError(f"No service URLs available for model: {selected_model}")
-
-            self.model = selected_model
-            self.base_url = urls[0]
-
-            logger.info(f"Using model: {self.model}")
-            logger.info(f"Using service URL: {self.base_url}")
 
             self._initialized = True
             logger.info("SecretAI service initialized successfully")
@@ -94,50 +68,28 @@ class SecretAIService:
             await self.initialize()
 
         try:
-            # Build message history in Ollama format
+            # Build message history in OpenAI format
             messages = []
 
             # Add conversation history
             if history:
                 for msg in history[-10:]:  # Last 10 messages
-                    role = "user" if msg.role == "user" else "assistant"
-                    messages.append({"role": role, "content": msg.content})
+                    messages.append({"role": msg.role, "content": msg.content})
 
             # Add current message
             messages.append({"role": "user", "content": message})
 
-            # Make direct HTTP request to Ollama-compatible endpoint
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                response = await client.post(
-                    f"{self.base_url}/api/chat",
-                    json={
-                        "model": self.model,
-                        "messages": messages,
-                        "stream": False,
-                        "options": {
-                            "temperature": 0.7,
-                        }
-                    },
-                    headers={
-                        "Authorization": f"Bearer {settings.SECRET_AI_API_KEY}",
-                        "Content-Type": "application/json"
-                    }
-                )
-                response.raise_for_status()
-                result = response.json()
+            # Use OpenAI client
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                stream=False
+            )
 
-                # Extract message content from Ollama response
-                if "message" in result and "content" in result["message"]:
-                    return result["message"]["content"]
-                else:
-                    logger.error(f"Unexpected response format: {result}")
-                    raise ValueError("Unexpected response format from SecretAI")
+            return response.choices[0].message.content
 
-        except httpx.HTTPError as e:
-            logger.error(f"HTTP error: {e}")
-            raise SecretAIError(f"Failed to get response from SecretAI: {e}")
         except Exception as e:
-            logger.error(f"Unexpected error: {e}")
+            logger.error(f"Chat error: {e}")
             raise
 
     async def chat_stream(
@@ -159,64 +111,33 @@ class SecretAIService:
             await self.initialize()
 
         try:
-            # Build message history in Ollama format
+            # Build message history in OpenAI format
             messages = []
 
             # Add conversation history
             if history:
                 for msg in history[-10:]:  # Last 10 messages
-                    role = "user" if msg.role == "user" else "assistant"
-                    messages.append({"role": role, "content": msg.content})
+                    messages.append({"role": msg.role, "content": msg.content})
 
             # Add current message
             messages.append({"role": "user", "content": message})
 
-            # Make streaming HTTP request to Ollama-compatible endpoint
-            async with httpx.AsyncClient(timeout=60.0) as client:
-                async with client.stream(
-                    "POST",
-                    f"{self.base_url}/api/chat",
-                    json={
-                        "model": self.model,
-                        "messages": messages,
-                        "stream": True,
-                        "options": {
-                            "temperature": 0.7,
-                        }
-                    },
-                    headers={
-                        "Authorization": f"Bearer {settings.SECRET_AI_API_KEY}",
-                        "Content-Type": "application/json"
-                    }
-                ) as response:
-                    response.raise_for_status()
+            # Use OpenAI client with streaming
+            stream = await self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                stream=True
+            )
 
-                    # Stream the response line by line
-                    async for line in response.aiter_lines():
-                        if line.strip():
-                            try:
-                                import json
-                                chunk_data = json.loads(line)
+            # Stream chunks as they arrive
+            async for chunk in stream:
+                if chunk.choices and len(chunk.choices) > 0:
+                    delta = chunk.choices[0].delta
+                    if hasattr(delta, 'content') and delta.content:
+                        yield delta.content
 
-                                # Extract message content from chunk
-                                if "message" in chunk_data and "content" in chunk_data["message"]:
-                                    content = chunk_data["message"]["content"]
-                                    if content:
-                                        yield content
-
-                                # Check if this is the final chunk
-                                if chunk_data.get("done", False):
-                                    break
-
-                            except json.JSONDecodeError:
-                                logger.warning(f"Failed to parse chunk: {line}")
-                                continue
-
-        except httpx.HTTPError as e:
-            logger.error(f"HTTP error during streaming: {e}")
-            raise SecretAIError(f"Failed to stream response from SecretAI: {e}")
         except Exception as e:
-            logger.error(f"Unexpected error during streaming: {e}")
+            logger.error(f"Streaming error: {e}")
             raise
 
 # Global service instance

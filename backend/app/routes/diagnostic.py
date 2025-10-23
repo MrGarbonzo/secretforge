@@ -26,7 +26,5 @@ async def diagnostic():
         secret_ai_initialized=secret_ai_service._initialized,
         last_error=secret_ai_service._last_error,
         model=secret_ai_service.model,
-        base_url=secret_ai_service.base_url,
-        chain_id=settings.SECRET_CHAIN_ID,
-        node_url=settings.SECRET_NODE_URL
+        base_url=secret_ai_service.base_url
     )
