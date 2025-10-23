@@ -17,5 +17,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/health')"
 
-# Run application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000"]
+# Run application with asyncio loop (Secret SDK doesn't support uvloop)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000", "--loop", "asyncio"]

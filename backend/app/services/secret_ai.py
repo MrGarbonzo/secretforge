@@ -11,24 +11,6 @@ from app.models import Message
 
 logger = logging.getLogger(__name__)
 
-# Monkeypatch nest_asyncio to work with uvloop
-# The Secret SDK tries to use nest_asyncio which doesn't support uvloop
-import nest_asyncio
-_original_apply = nest_asyncio.apply
-
-def _patched_apply(loop=None):
-    """Patched nest_asyncio.apply that works with uvloop."""
-    try:
-        return _original_apply(loop)
-    except ValueError as e:
-        if "uvloop" in str(e) or "patch loop" in str(e).lower():
-            # uvloop doesn't need nest_asyncio - just return the loop
-            logger.debug(f"Skipping nest_asyncio for uvloop: {e}")
-            return loop if loop is not None else asyncio.get_event_loop()
-        raise
-
-nest_asyncio.apply = _patched_apply
-
 class SecretAIService:
     """Service for interacting with SecretAI."""
 
