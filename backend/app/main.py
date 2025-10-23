@@ -2,7 +2,6 @@
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
@@ -57,8 +56,20 @@ app.add_middleware(
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(chat.router, prefix="/api", tags=["chat"])
 
-# Serve static files (chat UI)
-app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
+# Root endpoint
+@app.get("/")
+async def root():
+    """Root endpoint with API information."""
+    return {
+        "service": "SecretForge Chat Service",
+        "version": "1.0.0",
+        "description": "Privacy-focused AI chat powered by Secret Network",
+        "endpoints": {
+            "health": "/api/health",
+            "chat": "/api/chat",
+            "docs": "/docs"
+        }
+    }
 
 if __name__ == "__main__":
     import uvicorn
