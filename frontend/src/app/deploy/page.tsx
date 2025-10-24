@@ -11,8 +11,14 @@ import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import CodeBlock from '@/components/CodeBlock';
 import ThemeToggle from '@/components/ThemeToggle';
 import { generateDockerCompose } from '@/lib/generator';
-import { DeploymentConfig } from '@/types';
+import { DeploymentConfig, AgentType } from '@/types';
 import { ArrowLeft, ExternalLink, CheckCircle } from 'lucide-react';
+
+// VM Size recommendations per agent type (easy to update for future agents)
+const VM_RECOMMENDATIONS: Record<AgentType, 'small' | 'medium' | 'large'> = {
+  'standard': 'small',
+  'secret': 'small'
+};
 
 export default function Deploy() {
   const [dockerCompose, setDockerCompose] = useState<string>('');
@@ -228,20 +234,44 @@ export default function Deploy() {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle>VM Size Recommendations</CardTitle>
+              <CardDescription>
+                {config && `Recommended size for ${config.agentType === 'secret' ? 'Secret Agent' : 'Standard Agent'}`}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-3 text-sm">
-                <div>
-                  <strong className="text-text-primary dark:text-text-primary-dark">Small (1 vCPU, 2GB RAM, 20GB Storage)</strong>
-                  <p className="text-text-secondary dark:text-text-secondary-dark">Recommended for basic chat usage</p>
+                <div className={config && VM_RECOMMENDATIONS[config.agentType] === 'small' ? 'p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : ''}>
+                  <div className="flex items-center gap-2">
+                    <strong className="text-text-primary dark:text-text-primary-dark">Small (1 vCPU, 2GB RAM, 20GB Storage)</strong>
+                    {config && VM_RECOMMENDATIONS[config.agentType] === 'small' && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-500 text-white font-medium">
+                        Recommended
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-text-secondary dark:text-text-secondary-dark mt-1">Recommended for basic chat usage</p>
                 </div>
-                <div>
-                  <strong className="text-text-primary dark:text-text-primary-dark">Medium (2 vCPU, 4GB RAM, 40GB Storage)</strong>
-                  <p className="text-text-secondary dark:text-text-secondary-dark">Better performance with persistence enabled</p>
+                <div className={config && VM_RECOMMENDATIONS[config.agentType] === 'medium' ? 'p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : ''}>
+                  <div className="flex items-center gap-2">
+                    <strong className="text-text-primary dark:text-text-primary-dark">Medium (2 vCPU, 4GB RAM, 40GB Storage)</strong>
+                    {config && VM_RECOMMENDATIONS[config.agentType] === 'medium' && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-500 text-white font-medium">
+                        Recommended
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-text-secondary dark:text-text-secondary-dark mt-1">Better performance with persistence enabled</p>
                 </div>
-                <div>
-                  <strong className="text-text-primary dark:text-text-primary-dark">Large (4 vCPU, 8GB RAM, 80GB Storage)</strong>
-                  <p className="text-text-secondary dark:text-text-secondary-dark">Heavy usage or multiple concurrent users</p>
+                <div className={config && VM_RECOMMENDATIONS[config.agentType] === 'large' ? 'p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : ''}>
+                  <div className="flex items-center gap-2">
+                    <strong className="text-text-primary dark:text-text-primary-dark">Large (4 vCPU, 8GB RAM, 80GB Storage)</strong>
+                    {config && VM_RECOMMENDATIONS[config.agentType] === 'large' && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-500 text-white font-medium">
+                        Recommended
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-text-secondary dark:text-text-secondary-dark mt-1">Heavy usage or multiple concurrent users</p>
                 </div>
               </div>
             </CardContent>
