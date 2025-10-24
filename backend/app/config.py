@@ -22,10 +22,19 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./chat_history.db"
 
     # Secret Network
+    ENABLE_SECRET_NETWORK: bool = os.getenv("ENABLE_SECRET_NETWORK", "false").lower() == "true"
     SECRET_CHAIN_ID: str = "pulsar-3"
     SECRET_NODE_URL: str = os.getenv(
         "SECRET_NODE_URL",
         "https://pulsar.lcd.secretnodes.com"
+    )
+    SECRET_RPC_URL: str = os.getenv(
+        "SECRET_RPC_URL",
+        "https://rpc.secret.adrius.starshell.net"
+    )
+    SECRET_LCD_URL: str = os.getenv(
+        "SECRET_LCD_URL",
+        "https://lcd.secret.adrius.starshell.net/"
     )
 
     # Logging

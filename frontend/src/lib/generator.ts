@@ -2,8 +2,40 @@
  * Docker Compose generator for SecretForge deployments
  */
 
-export function generateDockerCompose(): string {
-  return `version: '3.8'
+export interface DeploymentOptions {
+  enableSecretNetwork?: boolean;
+}
+
+export function generateDockerCompose(options: DeploymentOptions = {}): string {
+  const { enableSecretNetwork = false } = options;
+
+  if (enableSecretNetwork) {
+    // Secret Network Agent Package template
+    return `version: '3.8'
+
+services:
+  secretforge-chat:
+    image: "ghcr.io/mrgarbonzo/secretforge/chat-secretnet:latest"
+    container_name: "secretforge-chat"
+    environment:
+      - SECRET_AI_API_KEY=\${SECRET_AI_API_KEY}
+      - ENABLE_SECRET_NETWORK=true
+      # Optional: Override default RPC/LCD endpoints
+      # - SECRET_RPC_URL=https://rpc.secret.adrius.starshell.net
+      # - SECRET_LCD_URL=https://lcd.secret.adrius.starshell.net/
+    ports:
+      - "80:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+`;
+  } else {
+    // Basic template
+    return `version: '3.8'
 
 services:
   secretforge-chat:
@@ -21,6 +53,7 @@ services:
       retries: 3
       start_period: 5s
 `;
+  }
 }
 
 export function copyToClipboard(text: string): Promise<void> {

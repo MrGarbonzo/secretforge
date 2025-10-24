@@ -10,19 +10,17 @@ import Link from 'next/link';
 import Button from '@/components/Button';
 import ConfigForm from '@/components/ConfigForm';
 import ThemeToggle from '@/components/ThemeToggle';
-import { VMSize, DeploymentConfig } from '@/types';
+import { DeploymentConfig, AgentType } from '@/types';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 export default function Configure() {
   const router = useRouter();
-  const [vmSize, setVMSize] = useState<VMSize>('small');
-  const [enableHistory, setEnableHistory] = useState(false);
+  const [agentType, setAgentType] = useState<AgentType>('standard');
 
   const handleGenerate = () => {
     // Save config to localStorage
     const config: DeploymentConfig = {
-      vmSize,
-      enableHistory,
+      agentType,
     };
     localStorage.setItem('deploymentConfig', JSON.stringify(config));
 
@@ -59,16 +57,14 @@ export default function Configure() {
               Configure Your Deployment
             </h2>
             <p className="text-text-secondary dark:text-text-secondary-dark">
-              Select the compute resources and options for your private AI chat service
+              Choose your AI agent type for your private chat service
             </p>
           </div>
 
           {/* Configuration Form */}
           <ConfigForm
-            vmSize={vmSize}
-            enableHistory={enableHistory}
-            onVMSizeChange={setVMSize}
-            onEnableHistoryChange={setEnableHistory}
+            agentType={agentType}
+            onAgentTypeChange={setAgentType}
           />
 
           {/* Actions */}

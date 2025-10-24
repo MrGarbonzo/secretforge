@@ -11,13 +11,25 @@ import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import CodeBlock from '@/components/CodeBlock';
 import ThemeToggle from '@/components/ThemeToggle';
 import { generateDockerCompose } from '@/lib/generator';
+import { DeploymentConfig } from '@/types';
 import { ArrowLeft, ExternalLink, CheckCircle } from 'lucide-react';
 
 export default function Deploy() {
   const [dockerCompose, setDockerCompose] = useState<string>('');
+  const [config, setConfig] = useState<DeploymentConfig | null>(null);
 
   useEffect(() => {
-    setDockerCompose(generateDockerCompose());
+    // Load config from localStorage
+    const saved = localStorage.getItem('deploymentConfig');
+    if (saved) {
+      const loadedConfig: DeploymentConfig = JSON.parse(saved);
+      setConfig(loadedConfig);
+      const enableSecretNetwork = loadedConfig.agentType === 'secret';
+      setDockerCompose(generateDockerCompose({ enableSecretNetwork }));
+    } else {
+      // Default to standard agent
+      setDockerCompose(generateDockerCompose({ enableSecretNetwork: false }));
+    }
   }, []);
 
   return (
@@ -52,6 +64,37 @@ export default function Deploy() {
               Copy this docker-compose template and deploy to SecretVM
             </p>
           </div>
+
+          {/* Configuration Summary */}
+          {config && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle>Your Configuration</CardTitle>
+                <CardDescription>
+                  Selected deployment settings
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-text-secondary dark:text-text-secondary-dark">
+                    Agent Type:
+                  </span>
+                  <span className="font-medium text-text-primary dark:text-text-primary-dark">
+                    {config.agentType === 'secret' ? (
+                      <span className="inline-flex items-center gap-2">
+                        Secret Agent
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500 text-white">
+                          Secret Network
+                        </span>
+                      </span>
+                    ) : (
+                      'Standard Agent'
+                    )}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Docker Compose File */}
           <div className="mb-8">

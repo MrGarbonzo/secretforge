@@ -1,5 +1,5 @@
 """Pydantic models for request/response validation."""
-from typing import List, Literal, Optional
+from typing import Dict, List, Literal, Optional
 from pydantic import BaseModel, Field
 
 class Message(BaseModel):
@@ -12,6 +12,9 @@ class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=10000)
     history: List[Message] = Field(default_factory=list, max_length=50)
     stream: bool = False
+    wallet_address: Optional[str] = None
+    viewing_keys: Optional[Dict[str, str]] = None  # token_symbol -> viewing_key
+    snip_balances: Optional[Dict[str, Dict]] = None  # Pre-fetched SNIP-20 balances from frontend
 
 class ChatResponse(BaseModel):
     """Chat response body."""

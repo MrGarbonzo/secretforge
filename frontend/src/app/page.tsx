@@ -32,9 +32,9 @@ export default function Home() {
             and deploy encrypted services to your own SecretVM instance.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/deploy">
+            <Link href="/configure">
               <Button size="lg">
-                Get Docker Compose
+                Configure Deployment
               </Button>
             </Link>
             <a href="https://docs.scrt.network/secret-network-documentation/secret-ai/" target="_blank" rel="noopener noreferrer">

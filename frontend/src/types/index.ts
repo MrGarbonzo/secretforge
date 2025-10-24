@@ -3,10 +3,10 @@
  */
 
 export type VMSize = 'small' | 'medium' | 'large';
+export type AgentType = 'standard' | 'secret';
 
 export interface DeploymentConfig {
-  vmSize: VMSize;
-  enableHistory: boolean;
+  agentType: AgentType;
 }
 
 export interface VMSizeOption {

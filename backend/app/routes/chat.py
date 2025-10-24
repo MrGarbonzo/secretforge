@@ -50,7 +50,10 @@ async def chat(request: ChatRequest):
             # Get regular response from SecretAI
             response = await secret_ai_service.chat(
                 message=request.message,
-                history=request.history
+                history=request.history,
+                wallet_address=request.wallet_address,
+                viewing_keys=request.viewing_keys,
+                snip_balances=request.snip_balances
             )
 
             return ChatResponse(

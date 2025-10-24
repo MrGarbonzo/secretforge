@@ -3,9 +3,23 @@ FROM python:3.12
 # Set working directory
 WORKDIR /app
 
-# Install dependencies
+# Install Node.js and git
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Clone and install Tairon's Secret Network MCP server
+RUN git clone https://github.com/Tairon-ai/scrt-network-mcp.git /app/mcp-servers/scrt-network-mcp \
+    && cd /app/mcp-servers/scrt-network-mcp \
+    && npm install
 
 # Copy application code
 COPY app/ ./app/
