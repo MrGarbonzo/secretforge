@@ -165,10 +165,44 @@
     <script src="/static/js/chat.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // Fetch config and show/hide wallet features
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    console.log('📋 Config loaded:', config);
+
+                    // Hide wallet button if Secret Network is not enabled
+                    const walletButton = document.getElementById('wallet-connect-btn');
+                    if (!config.secretNetwork && walletButton) {
+                        walletButton.style.display = 'none';
+                        console.log('🔒 Wallet features disabled (Standard Agent)');
+                    } else {
+                        console.log('🔓 Wallet features enabled (Secret Agent)');
+                    }
+
+                    return config;
+                } else {
+                    console.error('Failed to load config');
+                }
+            } catch (error) {
+                console.error('Error loading config:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load config first
+            const config = await loadConfig();
+
+            // Show welcome message
             setTimeout(() => {
                 if (window.ChatInterface && window.ChatInterface.addMessage) {
-                    window.ChatInterface.addMessage('Welcome to SecretForge! Connect your Keplr wallet to unlock blockchain features.', 'system');
+                    if (config && config.secretNetwork) {
+                        window.ChatInterface.addMessage('Welcome to SecretForge! Connect your Keplr wallet to unlock blockchain features.', 'system');
+                    } else {
+                        window.ChatInterface.addMessage('Welcome to SecretForge! Ask me anything.', 'system');
+                    }
                 }
             }, 500);
         });

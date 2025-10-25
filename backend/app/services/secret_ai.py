@@ -192,7 +192,7 @@ class SecretAIService:
             await self.initialize()
 
         try:
-            # PRE-PROCESSING: Use pre-fetched SNIP-20 balances from frontend (secretGPT approach)
+            # PRE-PROCESSING: Use pre-fetched SNIP-20 balances from frontend
             detected_token = self._detect_snip20_query(message)
             if detected_token and snip_balances:
                 # Check if we have a pre-fetched balance for this token
@@ -209,36 +209,9 @@ class SecretAIService:
                     else:
                         error = balance_data.get("error", "Unknown error")
                         return f"Sorry, I couldn't retrieve your {detected_token.upper()} balance: {error}"
-
-            # LEGACY: Fallback to old MCP approach if no pre-fetched balances
-            elif detected_token and wallet_address and viewing_keys:
-                # Check if we have a viewing key for this token
-                if detected_token.lower() in viewing_keys:
-                    logger.info(f"⚠️ Fallback: Calling MCP tool for {detected_token} (no pre-fetched balance)")
-
-                    try:
-                        # Call the SNIP-20 balance tool directly
-                        tool_result = await mcp_client.call_tool(
-                            "secret_query_snip20_balance",
-                            {
-                                "address": wallet_address,
-                                "token": detected_token,
-                                "viewingKey": viewing_keys[detected_token.lower()]
-                            }
-                        )
-
-                        # Extract the balance text from the result
-                        if tool_result.get("success") and tool_result.get("result"):
-                            content = tool_result["result"].get("content", [])
-                            if content and len(content) > 0:
-                                balance_text = content[0].get("text", "Unable to retrieve balance")
-                                return f"{balance_text}"
-
-                        return f"Sorry, I couldn't retrieve your {detected_token.upper()} balance at this time."
-
-                    except Exception as e:
-                        logger.error(f"Error calling SNIP-20 tool directly: {e}")
-                        return f"Sorry, I encountered an error while retrieving your {detected_token.upper()} balance: {str(e)}"
+            elif detected_token:
+                # No pre-fetched balances available - inform user they need to check via Keplr
+                return f"To check your {detected_token.upper()} balance, please use your Keplr wallet. SNIP-20 token balances require viewing keys which can only be managed through your wallet."
 
             # Build message history in OpenAI format
             messages = []
@@ -257,23 +230,16 @@ USE_TOOL: tool_name with arguments {{argument_key: "value"}}
 Examples:
 - USE_TOOL: secret_query_block with arguments {{}}
 - USE_TOOL: secret_query_balance with arguments {{"address": "secret1abc..."}}
-- USE_TOOL: secret_query_snip20_balance with arguments {{"token": "shd"}}
 
 Important:
 - For SCRT balance queries, use secret_query_balance
-- For SNIP-20 token balances (SHD, SILK, stkd-SCRT, etc.), use secret_query_snip20_balance
-- When the user asks for a token balance by symbol, use secret_query_snip20_balance
+- For SNIP-20 token balances (SHD, SILK, stkd-SCRT, etc.), these are only available via the user's Keplr wallet
 
 Only use tools when needed. For general questions, respond normally."""
 
-                # Enhance system prompt with wallet context (using secretGPT's pattern)
+                # Enhance system prompt with wallet context
                 if wallet_address:
                     system_prompt += f"\n\nThe user has connected their Keplr wallet with address: {wallet_address}. You can help them with Secret Network transactions, balance queries, and other blockchain operations."
-
-                # Add viewing keys info
-                if viewing_keys:
-                    tokens_with_keys = ', '.join(viewing_keys.keys()).upper()
-                    system_prompt += f"\n\nIMPORTANT: Viewing keys are ALREADY AVAILABLE and will be AUTOMATICALLY used for these tokens: {tokens_with_keys}. When querying SNIP-20 balances, just call secret_query_snip20_balance with the token symbol - DO NOT ask the user for viewing keys, they are already provided!"
 
                 messages.append({"role": "system", "content": system_prompt})
 
@@ -322,20 +288,6 @@ Only use tools when needed. For general questions, respond normally."""
                     for tool_call in tool_calls:
                         tool_name = tool_call["name"]
                         tool_args = tool_call["arguments"]
-
-                        # Auto-inject wallet address and viewing keys for SNIP-20 queries
-                        if tool_name == "secret_query_snip20_balance":
-                            # Add wallet address if not provided
-                            if "address" not in tool_args and wallet_address:
-                                tool_args["address"] = wallet_address
-                                logger.info(f"Auto-injected wallet address for SNIP-20 query")
-
-                            # Add viewing key if not provided and we have it
-                            if "viewingKey" not in tool_args and viewing_keys:
-                                token_symbol = tool_args.get("token", "").lower()
-                                if token_symbol in viewing_keys:
-                                    tool_args["viewingKey"] = viewing_keys[token_symbol]
-                                    logger.info(f"Auto-injected viewing key for {token_symbol}")
 
                         logger.info(f"Executing tool: {tool_name} with args: {tool_args}")
 

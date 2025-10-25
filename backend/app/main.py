@@ -68,8 +68,13 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 # Root endpoint - serve chat UI from static files
 @app.get("/", response_class=FileResponse)
 async def root():
-    """Serve the chat UI."""
-    return FileResponse(str(static_dir / "index.html"))
+    """Serve the appropriate chat UI based on agent type."""
+    if settings.AGENT_TYPE == "simple":
+        logger.info("Serving Simple Agent UI")
+        return FileResponse(str(static_dir / "index-simple.html"))
+    else:
+        logger.info("Serving Secret Agent UI")
+        return FileResponse(str(static_dir / "index.html"))
 
 if __name__ == "__main__":
     import uvicorn

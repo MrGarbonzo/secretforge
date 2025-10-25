@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/chat.css">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0A0A0A; color: #FFF; }
+        .container { max-width: 800px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; padding: 20px; }
+        .chat-header { text-align: center; padding: 20px 0; border-bottom: 1px solid #2A2A2A; margin-bottom: 20px; }
+        .chat-header h1 { font-size: 24px; font-weight: 600; }
+        .subtitle { font-size: 14px; color: #B0B0B0; }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 20px 0; display: flex; flex-direction: column; gap: 16px; }
+        .message { padding: 12px 16px; border-radius: 8px; max-width: 80%; word-wrap: break-word; }
+        .message-user { align-self: flex-end; background: #FFF; color: #1A1A1A; }
+        .message-assistant { align-self: flex-start; background: #1A1A1A; color: #FFF; border: 1px solid #2A2A2A; }
+        .message-system { align-self: center; background: #F59E0B; color: #1A1A1A; font-size: 14px; }
+        .chat-form { display: flex; gap: 12px; padding-top: 20px; border-top: 1px solid #2A2A2A; }
+        #message-input { flex: 1; padding: 12px 16px; border: 1px solid #2A2A2A; border-radius: 8px; background: #1A1A1A; color: #FFF; font-size: 16px; outline: none; }
+        #message-input:focus { border-color: #FFF; }
+        #send-button { padding: 12px 24px; background: #FFF; color: #1A1A1A; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        #send-button:hover { opacity: 0.9; }
+        #send-button:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-header">
+            <div>
+                <h1>AI Chat</h1>
+                <p class="subtitle">Powered by Secret AI</p>
+            </div>
+        </div>
+        <div id="chat-messages"></div>
+        <form id="chat-form" class="chat-form">
+            <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off" required />
+            <button type="submit" id="send-button">Send</button>
+        </form>
+    </div>
+
+    <!-- Simple toast notification system -->
+    <script>
+        window.SecretGPTee = {
+            showToast: function(message, type = 'info') {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+
+                const toast = document.createElement('div');
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 20px;
+                    background: ${type === 'error' ? '#ff4444' : type === 'success' ? '#10B981' : type === 'warning' ? '#F59E0B' : '#2A2A2A'};
+                    color: white;
+                    border-radius: 8px;
+                    z-index: 10000;
+                    font-size: 14px;
+                    max-width: 300px;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                `;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.style.transition = 'opacity 0.3s';
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        };
+    </script>
+
+    <!-- App scripts (no wallet.js) -->
+    <script src="/static/js/chat.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Show welcome message
+            setTimeout(() => {
+                if (window.ChatInterface && window.ChatInterface.addMessage) {
+                    window.ChatInterface.addMessage('Welcome! How can I help you today?', 'system');
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

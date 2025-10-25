@@ -10,6 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 
+# Set default to Simple Agent
+ENV AGENT_TYPE=simple
+
 # Expose port (mapped to 80 externally)
 EXPOSE 3000
 

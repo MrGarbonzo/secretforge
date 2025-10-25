@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     RELOAD: bool = False
 
     # Application Settings
+    AGENT_TYPE: Literal["simple", "secret"] = os.getenv("AGENT_TYPE", "simple")
     ENABLE_HISTORY: bool = os.getenv("ENABLE_HISTORY", "false").lower() == "true"
     VM_SIZE: Literal["small", "medium", "large"] = os.getenv("VM_SIZE", "small")
 
@@ -35,6 +36,12 @@ class Settings(BaseSettings):
     SECRET_LCD_URL: str = os.getenv(
         "SECRET_LCD_URL",
         "https://lcd.secret.adrius.starshell.net/"
+    )
+
+    # MCP Server
+    SECRET_MCP_URL: str = os.getenv(
+        "SECRET_MCP_URL",
+        "http://secret-mcp:8002"
     )
 
     # Logging

@@ -14,7 +14,7 @@ class MCPClient:
 
     def __init__(self):
         """Initialize the MCP client."""
-        self.base_url = "http://localhost:8002"
+        self.base_url = settings.SECRET_MCP_URL
         self.client: Optional[httpx.AsyncClient] = None
         self._initialized = False
 
@@ -41,7 +41,7 @@ class MCPClient:
 
         except Exception as e:
             logger.error(f"Failed to initialize MCP HTTP client: {e}")
-            logger.warning("MCP server may not be running on port 8002")
+            logger.warning(f"MCP server may not be running at {self.base_url}")
             raise
 
     async def list_tools(self) -> List[Dict[str, Any]]:
