@@ -3,23 +3,9 @@ FROM python:3.12
 # Set working directory
 WORKDIR /app
 
-# Install Node.js and git
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Clone and install Tairon's Secret Network MCP server
-RUN git clone https://github.com/Tairon-ai/scrt-network-mcp.git /app/mcp-servers/scrt-network-mcp \
-    && cd /app/mcp-servers/scrt-network-mcp \
-    && npm install
 
 # Copy application code
 COPY app/ ./app/
@@ -31,5 +17,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:3000/api/health')"
 
-# Run application with asyncio loop (Secret SDK doesn't support uvloop)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000", "--loop", "asyncio"]
+# Run application with standard uvloop
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3000"]
