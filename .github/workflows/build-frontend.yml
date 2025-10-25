@@ -12,7 +12,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/secretforge-ui
+  IMAGE_NAME: ${{ github.repository }}/ui
 
 jobs:
   build-and-push:
