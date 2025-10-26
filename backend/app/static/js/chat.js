@@ -75,6 +75,28 @@ const ChatInterface = {
                     console.log('🔑 Sending with viewing keys for:', Object.keys(window.WalletState.viewingKeys));
                 }
 
+                // PRE-FETCH SCRT BALANCE
+                // Detect SCRT balance queries in the message
+                if (this.detectScrtQuery(message) && window.WalletState && window.WalletState.balance) {
+                    console.log('🎯 Detected SCRT balance query');
+
+                    const scrtBalance = window.WalletState.balance;
+                    if (scrtBalance && scrtBalance.amount) {
+                        // Format balance from uscrt to SCRT
+                        const scrtAmount = parseFloat(scrtBalance.amount) / 1000000;
+                        const formattedBalance = scrtAmount.toFixed(6);
+
+                        requestBody.scrt_balance = {
+                            success: true,
+                            amount: scrtBalance.amount,  // Raw uscrt amount
+                            formatted: formattedBalance,
+                            denom: scrtBalance.denom || 'uscrt'
+                        };
+
+                        console.log('💰 Pre-fetched SCRT balance:', formattedBalance, 'SCRT');
+                    }
+                }
+
                 // PRE-FETCH SNIP-20 BALANCES (secretGPT approach)
                 // Detect SNIP token queries in the message
                 const detectedTokens = this.detectSnipTokens(message);
@@ -183,6 +205,36 @@ const ChatInterface = {
         }
 
         return detectedTokens;
+    },
+
+    detectScrtQuery(message) {
+        // Detect SCRT balance queries in the message
+        // Returns true if SCRT query detected, false otherwise
+        const messageLower = message.toLowerCase();
+
+        // Patterns to detect SCRT balance queries
+        const patterns = [
+            '\\bscrt\\s+balance\\b',
+            '\\bmy\\s+scrt\\b',
+            '\\bcheck\\s+scrt\\b',
+            '\\bhow\\s+much\\s+scrt\\b',
+            '\\bscrt\\s+amount\\b',
+            '\\bbalance\\s+of\\s+scrt\\b',
+            '\\bquery\\s+scrt\\b',
+            '\\bshow\\s+scrt\\b',
+            '\\bscrt\\s+(token|tokens)\\b',
+            '\\b(my|check|show|query)\\s+(native\\s+)?balance\\b',  // Generic balance query
+            '\\bhow\\s+much\\s+(native\\s+)?balance\\b'
+        ];
+
+        for (const pattern of patterns) {
+            const regex = new RegExp(pattern, 'i');
+            if (regex.test(messageLower)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 };
 

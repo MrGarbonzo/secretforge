@@ -15,6 +15,7 @@ class ChatRequest(BaseModel):
     wallet_address: Optional[str] = None
     viewing_keys: Optional[Dict[str, str]] = None  # token_symbol -> viewing_key
     snip_balances: Optional[Dict[str, Dict]] = None  # Pre-fetched SNIP-20 balances from frontend
+    scrt_balance: Optional[Dict] = None  # Pre-fetched SCRT balance from frontend
 
 class ChatResponse(BaseModel):
     """Chat response body."""

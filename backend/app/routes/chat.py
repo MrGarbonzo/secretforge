@@ -53,7 +53,8 @@ async def chat(request: ChatRequest):
                 history=request.history,
                 wallet_address=request.wallet_address,
                 viewing_keys=request.viewing_keys,
-                snip_balances=request.snip_balances
+                snip_balances=request.snip_balances,
+                scrt_balance=request.scrt_balance
             )
 
             return ChatResponse(

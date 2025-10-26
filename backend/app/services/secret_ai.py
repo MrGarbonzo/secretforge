@@ -167,13 +167,43 @@ class SecretAIService:
 
         return None
 
+    def _detect_scrt_query(self, message: str) -> bool:
+        """
+        Detect if the message is asking for SCRT (native token) balance.
+        Returns True if SCRT query detected, False otherwise.
+        """
+        message_lower = message.lower()
+
+        # Patterns to detect SCRT balance queries
+        patterns = [
+            r'\bscrt\s+balance\b',
+            r'\bmy\s+scrt\b',
+            r'\bcheck\s+scrt\b',
+            r'\bhow\s+much\s+scrt\b',
+            r'\bscrt\s+amount\b',
+            r'\bbalance\s+of\s+scrt\b',
+            r'\bquery\s+scrt\b',
+            r'\bshow\s+scrt\b',
+            r'\bscrt\s+(token|tokens)\b',
+            r'\b(my|check|show|query)\s+(native\s+)?balance\b',  # Generic balance query
+            r'\bhow\s+much\s+(native\s+)?balance\b'
+        ]
+
+        for pattern in patterns:
+            if re.search(pattern, message_lower):
+                logger.info(f"🎯 Detected SCRT balance query")
+                return True
+
+        return False
+
     async def chat(
         self,
         message: str,
         history: List[Message] = None,
         wallet_address: Optional[str] = None,
         viewing_keys: Optional[Dict[str, str]] = None,
-        snip_balances: Optional[Dict[str, Dict]] = None
+        snip_balances: Optional[Dict[str, Dict]] = None,
+        scrt_balance: Optional[Dict] = None
     ) -> str:
         """
         Send a chat message and get response using prompt-based tool calling.
@@ -184,6 +214,7 @@ class SecretAIService:
             wallet_address: Connected Keplr wallet address (optional)
             viewing_keys: SNIP-20 viewing keys from Keplr (optional)
             snip_balances: Pre-fetched SNIP-20 balances from frontend (optional)
+            scrt_balance: Pre-fetched SCRT balance from frontend (optional)
 
         Returns:
             AI response text
@@ -192,6 +223,22 @@ class SecretAIService:
             await self.initialize()
 
         try:
+            # PRE-PROCESSING: Use pre-fetched SCRT balance from frontend
+            if self._detect_scrt_query(message) and scrt_balance:
+                logger.info(f"✅ Using pre-fetched SCRT balance from wallet")
+
+                if scrt_balance.get("success"):
+                    formatted = scrt_balance.get("formatted", "0.000000")
+
+                    # Return formatted response
+                    return f"Your SCRT balance is {formatted} SCRT"
+                else:
+                    error = scrt_balance.get("error", "Unknown error")
+                    return f"Sorry, I couldn't retrieve your SCRT balance: {error}"
+            elif self._detect_scrt_query(message):
+                # No pre-fetched balance available - inform user they need to connect wallet
+                return "To check your SCRT balance, please connect your Keplr wallet."
+
             # PRE-PROCESSING: Use pre-fetched SNIP-20 balances from frontend
             detected_token = self._detect_snip20_query(message)
             if detected_token and snip_balances:
