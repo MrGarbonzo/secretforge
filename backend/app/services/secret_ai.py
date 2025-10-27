@@ -11,6 +11,8 @@ from app.services.mcp_client import mcp_client
 
 logger = logging.getLogger(__name__)
 
+# Force rebuild - personality traits system active
+
 # SNIP-20 token symbols that we support
 SNIP20_TOKENS = ['shd', 'silk', 'sscrt', 'stkd-scrt', 'sinj', 'swbtc', 'susdt', 'snobleusdc']
 
