@@ -31,10 +31,19 @@ export default function Deploy() {
       const loadedConfig: DeploymentConfig = JSON.parse(saved);
       setConfig(loadedConfig);
       const enableSecretNetwork = loadedConfig.agentType === 'secret';
-      setDockerCompose(generateDockerCompose({ enableSecretNetwork }));
+      setDockerCompose(
+        generateDockerCompose({
+          enableSecretNetwork,
+          traits: loadedConfig.traits,
+        })
+      );
     } else {
-      // Default to standard agent
-      setDockerCompose(generateDockerCompose({ enableSecretNetwork: false }));
+      // Default to standard agent with default traits
+      setDockerCompose(
+        generateDockerCompose({
+          enableSecretNetwork: false,
+        })
+      );
     }
   }, []);
 
@@ -81,22 +90,82 @@ export default function Deploy() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-text-secondary dark:text-text-secondary-dark">
-                    Agent Type:
-                  </span>
-                  <span className="font-medium text-text-primary dark:text-text-primary-dark">
-                    {config.agentType === 'secret' ? (
-                      <span className="inline-flex items-center gap-2">
-                        Secret Agent
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500 text-white">
-                          Secret Network
+                <div className="space-y-3">
+                  {/* Agent Type */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-text-secondary dark:text-text-secondary-dark">
+                      Agent Type:
+                    </span>
+                    <span className="font-medium text-text-primary dark:text-text-primary-dark">
+                      {config.agentType === 'secret' ? (
+                        <span className="inline-flex items-center gap-2">
+                          Secret Agent
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500 text-white">
+                            Secret Network
+                          </span>
                         </span>
-                      </span>
-                    ) : (
-                      'Standard Agent'
-                    )}
-                  </span>
+                      ) : (
+                        'Standard Agent'
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Personality Traits */}
+                  {config.traits && (
+                    <>
+                      <div className="border-t border-border dark:border-border-dark pt-3">
+                        <div className="text-sm font-semibold text-text-primary dark:text-text-primary-dark mb-2">
+                          Personality Traits
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center justify-between">
+                            <span className="text-text-secondary dark:text-text-secondary-dark">
+                              Response Length:
+                            </span>
+                            <span className="font-medium text-text-primary dark:text-text-primary-dark capitalize">
+                              {config.traits.responseLength}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-text-secondary dark:text-text-secondary-dark">
+                              Style:
+                            </span>
+                            <span className="font-medium text-text-primary dark:text-text-primary-dark capitalize">
+                              {config.traits.communicationStyle}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-text-secondary dark:text-text-secondary-dark">
+                              Education Level:
+                            </span>
+                            <span className="font-medium text-text-primary dark:text-text-primary-dark capitalize">
+                              {config.traits.technicalLevel}
+                            </span>
+                          </div>
+                          {config.traits.personality.length > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-text-secondary dark:text-text-secondary-dark">
+                                Personality:
+                              </span>
+                              <span className="font-medium text-text-primary dark:text-text-primary-dark capitalize">
+                                {config.traits.personality.join(', ')}
+                              </span>
+                            </div>
+                          )}
+                          {config.traits.special.length > 0 && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-text-secondary dark:text-text-secondary-dark">
+                                Special:
+                              </span>
+                              <span className="font-medium text-text-primary dark:text-text-primary-dark capitalize">
+                                {config.traits.special.join(', ')}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

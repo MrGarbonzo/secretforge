@@ -2,12 +2,33 @@
  * Docker Compose generator for SecretForge deployments
  */
 
+import { PersonalityTraits } from '@/types';
+
 export interface DeploymentOptions {
   enableSecretNetwork?: boolean;
+  traits?: PersonalityTraits;
+}
+
+function buildTraitEnvVars(traits?: PersonalityTraits): string {
+  if (!traits) {
+    // Use defaults
+    return `      - RESPONSE_LENGTH=balanced
+      - COMMUNICATION_STYLE=casual
+      - TECHNICAL_LEVEL=balanced
+      - PERSONALITY=friendly
+      - SPECIAL_TRAITS=`;
+  }
+
+  return `      - RESPONSE_LENGTH=${traits.responseLength}
+      - COMMUNICATION_STYLE=${traits.communicationStyle}
+      - TECHNICAL_LEVEL=${traits.technicalLevel}
+      - PERSONALITY=${traits.personality.join(',')}
+      - SPECIAL_TRAITS=${traits.special.join(',')}`;
 }
 
 export function generateDockerCompose(options: DeploymentOptions = {}): string {
-  const { enableSecretNetwork = false } = options;
+  const { enableSecretNetwork = false, traits } = options;
+  const traitEnvVars = buildTraitEnvVars(traits);
 
   if (enableSecretNetwork) {
     // Secret Agent: Full blockchain support with Keplr wallet and MCP server
@@ -24,6 +45,9 @@ services:
       # Optional: Override default RPC/LCD endpoints
       # - SECRET_RPC_URL=https://rpc.secret.adrius.starshell.net
       # - SECRET_LCD_URL=https://lcd.secret.adrius.starshell.net/
+
+      # Personality Traits
+${traitEnvVars}
     ports:
       - "80:3000"
     restart: unless-stopped
@@ -65,6 +89,9 @@ services:
     environment:
       - SECRET_AI_API_KEY=\${SECRET_AI_API_KEY}
       - AGENT_TYPE=simple
+
+      # Personality Traits
+${traitEnvVars}
     ports:
       - "80:3000"
     restart: unless-stopped

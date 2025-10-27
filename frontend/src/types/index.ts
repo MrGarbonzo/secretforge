@@ -5,8 +5,24 @@
 export type VMSize = 'small' | 'medium' | 'large';
 export type AgentType = 'standard' | 'secret';
 
+// Personality trait types
+export type ResponseLength = 'concise' | 'balanced' | 'talkative';
+export type CommunicationStyle = 'casual' | 'professional' | 'western' | 'pirate';
+export type TechnicalLevel = 'beginner-friendly' | 'balanced' | 'expert';
+export type Personality = 'friendly' | 'humorous';
+export type SpecialTrait = 'emoji-rich' | 'degen' | 'privacy-maxi';
+
+export interface PersonalityTraits {
+  responseLength: ResponseLength;
+  communicationStyle: CommunicationStyle;
+  technicalLevel: TechnicalLevel;
+  personality: Personality[];
+  special: SpecialTrait[];
+}
+
 export interface DeploymentConfig {
   agentType: AgentType;
+  traits: PersonalityTraits;
 }
 
 export interface VMSizeOption {

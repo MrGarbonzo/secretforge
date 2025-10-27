@@ -25,6 +25,7 @@ class SecretAIService:
         self._initialized = False
         self._last_error: Optional[str] = None
         self._tools: List[Dict[str, Any]] = []
+        self._personality_prompt: str = ""  # Built during initialize
 
     async def initialize(self):
         """Initialize the SecretAI client."""
@@ -50,6 +51,10 @@ class SecretAIService:
 
             self._initialized = True
             logger.info("SecretAI service initialized successfully")
+
+            # Build personality prompt from environment variables
+            self._personality_prompt = self._build_personality_prompt()
+            logger.info("Personality prompt configured")
 
             # Initialize MCP client if Secret Network is enabled
             if settings.ENABLE_SECRET_NETWORK:
@@ -114,6 +119,54 @@ class SecretAIService:
             tool_descriptions.append(desc)
 
         return "\n".join(tool_descriptions)
+
+    def _build_personality_prompt(self) -> str:
+        """Build personality modifications from environment variables."""
+        parts = []
+
+        # Response Length
+        if settings.RESPONSE_LENGTH == 'concise':
+            parts.append("Keep responses brief and to-the-point, typically 1-3 sentences.")
+        elif settings.RESPONSE_LENGTH == 'talkative':
+            parts.append("Provide detailed, comprehensive responses with explanations and context.")
+        # 'balanced' is default, no modification needed
+
+        # Communication Style
+        if settings.COMMUNICATION_STYLE == 'western':
+            parts.append("Speak like a friendly cowboy. Use western slang like 'howdy', 'partner', 'reckon', 'mighty fine'.")
+        elif settings.COMMUNICATION_STYLE == 'pirate':
+            parts.append("Speak like a pirate! Use 'arr', 'matey', 'ahoy', 'ye' instead of 'you'.")
+        elif settings.COMMUNICATION_STYLE == 'professional':
+            parts.append("Maintain a professional, business-like tone. Be formal and precise.")
+        # 'casual' is default
+
+        # Education/Communication Level
+        if settings.TECHNICAL_LEVEL == 'beginner-friendly':
+            parts.append("Communicate at a high school education level. Use clear, simple language and explain all concepts accessibly. Avoid complex vocabulary and jargon.")
+        elif settings.TECHNICAL_LEVEL == 'expert':
+            parts.append("Communicate at an expert level. Use advanced vocabulary, sophisticated concepts, and assume deep knowledge across topics.")
+        # 'balanced' (college level) is default
+
+        # Personality (can be multiple)
+        personality_traits = [t.strip() for t in settings.PERSONALITY.split(',') if t.strip()]
+        if 'friendly' in personality_traits:
+            parts.append("Be warm, encouraging, and supportive in your responses.")
+        if 'humorous' in personality_traits:
+            parts.append("Use humor, wit, and jokes when appropriate to make interactions fun.")
+
+        # Special Traits (can be multiple)
+        special_traits = [t.strip() for t in settings.SPECIAL_TRAITS.split(',') if t.strip()]
+        if 'emoji-rich' in special_traits:
+            parts.append("Use emojis frequently throughout your responses to add personality and visual appeal. 🚀✨🎉")
+        if 'degen' in special_traits:
+            parts.append("Use crypto/web3 slang naturally: 'wen moon', 'wagmi' (we're all gonna make it), 'ngmi' (not gonna make it), 'fren', 'gm' (good morning), 'ser'.")
+        if 'privacy-maxi' in special_traits:
+            parts.append("You are a privacy advocate. Emphasize the importance of confidential computing, encryption, and privacy-preserving technology. Highlight how Secret Network's TEE provides verifiable privacy. Be skeptical of unnecessary data collection and always recommend privacy-first solutions. Use terms like 'confidential', 'encrypted', 'private by default', 'TEE', 'zero-knowledge'.")
+
+        # Join all parts with newlines
+        if parts:
+            return "\n\n" + "\n".join(parts)
+        return ""
 
     def _extract_tool_calls_from_text(self, text: str) -> List[Dict[str, Any]]:
         """Extract tool calls from AI response text using regex pattern."""
@@ -287,6 +340,9 @@ Only use tools when needed. For general questions, respond normally."""
                 # Enhance system prompt with wallet context
                 if wallet_address:
                     system_prompt += f"\n\nThe user has connected their Keplr wallet with address: {wallet_address}. You can help them with Secret Network transactions, balance queries, and other blockchain operations."
+
+                # Add personality traits to system prompt
+                system_prompt += self._personality_prompt
 
                 messages.append({"role": "system", "content": system_prompt})
 

@@ -44,6 +44,13 @@ class Settings(BaseSettings):
         "http://secret-mcp:8002"
     )
 
+    # Personality Traits
+    RESPONSE_LENGTH: str = os.getenv("RESPONSE_LENGTH", "balanced")
+    COMMUNICATION_STYLE: str = os.getenv("COMMUNICATION_STYLE", "casual")
+    TECHNICAL_LEVEL: str = os.getenv("TECHNICAL_LEVEL", "balanced")
+    PERSONALITY: str = os.getenv("PERSONALITY", "friendly")  # Comma-separated
+    SPECIAL_TRAITS: str = os.getenv("SPECIAL_TRAITS", "")    # Comma-separated
+
     # Logging
     LOG_LEVEL: str = "INFO"
 
