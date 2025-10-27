@@ -347,6 +347,14 @@ Only use tools when needed. For general questions, respond normally."""
                 system_prompt += self._personality_prompt
 
                 messages.append({"role": "system", "content": system_prompt})
+            else:
+                # For simple agents without tools, create basic system prompt with personality
+                system_prompt = "You are a helpful AI assistant."
+
+                # Add personality traits to system prompt
+                system_prompt += self._personality_prompt
+
+                messages.append({"role": "system", "content": system_prompt})
 
             # Add conversation history
             if history:
