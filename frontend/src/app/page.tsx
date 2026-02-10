@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Button from '@/components/Button';
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Shield, Lock, Code, Zap } from 'lucide-react';
+import { Shield, Lock, Code, Zap, MessageSquare, Coins } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -27,21 +27,33 @@ export default function Home() {
           <h2 className="text-4xl md:text-5xl font-bold text-text-primary dark:text-text-primary-dark mb-6">
             Deploy Private AI Services
           </h2>
-          <p className="text-xl text-text-secondary dark:text-text-secondary-dark mb-8">
-            Privacy-first deployment platform for Secret Network. Generate docker-compose configurations
-            and deploy encrypted services to your own SecretVM instance.
+          <p className="text-xl text-text-secondary dark:text-text-secondary-dark mb-10">
+            Privacy-first deployment platform for Secret Network. Deploy encrypted agents
+            to your own SecretVM instance — from AI chat bots to autonomous Solana agents.
           </p>
-          <div className="flex gap-4 justify-center">
-            <Link href="/configure">
-              <Button size="lg">
-                Configure Deployment
-              </Button>
+          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <Link href="/configure" className="block">
+              <Card className="h-full text-left hover:border-text-primary dark:hover:border-text-primary-dark transition-colors cursor-pointer">
+                <CardContent className="pt-6">
+                  <MessageSquare className="w-10 h-10 mb-4 text-text-primary dark:text-text-primary-dark" />
+                  <CardTitle className="mb-2">Chat Bots</CardTitle>
+                  <CardDescription>
+                    Deploy a private AI chat assistant with customizable personality running in encrypted TEE hardware
+                  </CardDescription>
+                </CardContent>
+              </Card>
             </Link>
-            <a href="https://docs.scrt.network/secret-network-documentation/secret-ai/" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="lg">
-                Learn More
-              </Button>
-            </a>
+            <Link href="/proof-of-flip" className="block">
+              <Card className="h-full text-left hover:border-text-primary dark:hover:border-text-primary-dark transition-colors cursor-pointer">
+                <CardContent className="pt-6">
+                  <Coins className="w-10 h-10 mb-4 text-text-primary dark:text-text-primary-dark" />
+                  <CardTitle className="mb-2">Proof of Flip</CardTitle>
+                  <CardDescription>
+                    Launch an autonomous coin-flip agent that bets real USDC on Solana — provably fair, running in TEE
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         </div>
       </section>
@@ -104,10 +116,10 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-semibold text-text-primary dark:text-text-primary-dark mb-1">
-                  Get Docker Compose Template
+                  Pick Your Agent
                 </h4>
                 <p className="text-text-secondary dark:text-text-secondary-dark">
-                  Copy the ready-to-deploy configuration file from SecretForge
+                  Choose an agent type above — a private chat bot or an autonomous Solana agent
                 </p>
               </div>
             </div>
@@ -118,10 +130,10 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-semibold text-text-primary dark:text-text-primary-dark mb-1">
-                  Go to SecretAI Portal
+                  Get Your Docker Compose
                 </h4>
                 <p className="text-text-secondary dark:text-text-secondary-dark">
-                  Configure VM size, enable persistence, and paste your docker-compose
+                  SecretForge generates a ready-to-deploy configuration for your agent
                 </p>
               </div>
             </div>
@@ -132,10 +144,10 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-semibold text-text-primary dark:text-text-primary-dark mb-1">
-                  Add Your API Key & Launch
+                  Deploy on SecretVM
                 </h4>
                 <p className="text-text-secondary dark:text-text-secondary-dark">
-                  Set your SecretAI API key as an environment variable and deploy
+                  Paste the config into the SecretAI portal, add your secrets, and launch
                 </p>
               </div>
             </div>
@@ -146,10 +158,10 @@ export default function Home() {
               </div>
               <div>
                 <h4 className="font-semibold text-text-primary dark:text-text-primary-dark mb-1">
-                  Start Chatting Privately
+                  Your Agent is Live
                 </h4>
                 <p className="text-text-secondary dark:text-text-secondary-dark">
-                  Access your encrypted AI assistant via your unique SecretVM URL
+                  Your agent runs in encrypted TEE hardware — verifiably private and autonomous
                 </p>
               </div>
             </div>
